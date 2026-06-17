@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geekology: Atelier Reborn</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600&family=Space+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #050510;
+            --bg-card: rgba(15, 15, 40, 0.55);
+            --accent: #7dd3fc;
+            --accent-glow: rgba(125, 211, 252, 0.4);
+            --accent2: #c084fc;
+            --text-primary: #e2e8f0;
+            --text-muted: #94a3b8;
+            --border: rgba(125, 211, 252, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            cursor: default;
+        }
+
+        /* ── Starfield Canvas ── */
+        #starfield {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* ── Main Content ── */
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* ── Hero Section ── */
+        .hero {
+            text-align: center;
+            padding-top: max(18vh, 120px);
+            padding-bottom: 80px;
+        }
+
+        .title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2rem, 5.5vw, 4rem);
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            background: linear-gradient(135deg, #e2e8f0 0%, #7dd3fc 45%, #c084fc 75%, #e2e8f0 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 4s ease-in-out infinite;
+            margin-bottom: 8px;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { background-position: 0% center; }
+            50% { background-position: 100% center; }
+        }
+
+        .title-separator {
+            width: 120px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            margin: 0 auto 32px;
+        }
+
+        /* ── Rotating O's Subtitle ── */
+        .subtitle {
+            font-family: 'Space Mono', 'Inter', monospace;
+            font-size: clamp(0.9rem, 1.6vw, 1.15rem);
+            color: var(--text-muted);
+            letter-spacing: 0.02em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0;
+            line-height: 1;
+        }
+
+        .subtitle-prefix,
+        .subtitle-suffix {
+            white-space: nowrap;
+        }
+
+        .orbit-container {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.8em;
+            height: 2.8em;
+            margin: 0 0.25em;
+        }
+
+        .orbit-o {
+            position: absolute;
+            color: var(--accent);
+            font-weight: 700;
+            font-size: 1em;
+            text-shadow: 0 0 12px var(--accent-glow), 0 0 24px var(--accent-glow);
+            animation: orbitSpin 2.5s linear infinite;
+            transform-origin: center center;
+        }
+
+        .orbit-o:nth-child(1) { animation-delay: 0s; }
+        .orbit-o:nth-child(2) { animation-delay: -0.5s; }
+        .orbit-o:nth-child(3) { animation-delay: -1.0s; }
+        .orbit-o:nth-child(4) { animation-delay: -1.5s; }
+        .orbit-o:nth-child(5) { animation-delay: -2.0s; }
+
+        @keyframes orbitSpin {
+            0% {
+                transform: rotate(0deg) translateX(13px) rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg) translateX(13px) rotate(-360deg);
+            }
+        }
+
+        .subtitle-by {
+            display: block;
+            width: 100%;
+            margin-top: 10px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.82em;
+            color: var(--accent2);
+            opacity: 0.65;
+            letter-spacing: 0.08em;
+        }
+
+        /* ── Repos Section ── */
+        .repos-section {
+            width: 100%;
+            max-width: 680px;
+            padding-bottom: 60px;
+        }
+
+        .section-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            letter-spacing: 0.18em;
+            color: var(--accent);
+            text-transform: uppercase;
+            margin-bottom: 28px;
+            text-align: center;
+        }
+
+        .repo-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            padding: 24px 28px;
+            margin-bottom: 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            color: inherit;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .repo-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 50% 0%, var(--accent-glow), transparent 70%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .repo-card:hover {
+            border-color: rgba(125, 211, 252, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(125, 211, 252, 0.08), 0 2px 8px rgba(125, 211, 252, 0.04);
+        }
+
+        .repo-card:hover::before {
+            opacity: 0.06;
+        }
+
+        .repo-icon {
+            flex-shrink: 0;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: rgba(125, 211, 252, 0.08);
+            color: var(--accent);
+            margin-top: 2px;
+        }
+
+        .repo-icon svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .repo-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .repo-name {
+            font-weight: 600;
+            font-size: 1.05rem;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .fork-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            padding: 2px 10px;
+            border-radius: 99px;
+            background: rgba(192, 132, 252, 0.12);
+            color: var(--accent2);
+            letter-spacing: 0.04em;
+        }
+
+        .repo-desc {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .repo-arrow {
+            flex-shrink: 0;
+            color: var(--text-muted);
+            transition: all 0.3s ease;
+            margin-top: 8px;
+        }
+
+        .repo-card:hover .repo-arrow {
+            color: var(--accent);
+            transform: translateX(4px);
+        }
+
+        /* ── Loading State ── */
+        .loading-skeleton {
+            animation: pulse 1.8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 0.8; }
+        }
+
+        .skeleton-line {
+            height: 12px;
+            background: rgba(125, 211, 252, 0.1);
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+
+        .skeleton-line:last-child {
+            width: 60%;
+        }
+
+        /* ── Footer ── */
+        .footer {
+            text-align: center;
+            padding: 40px 24px 48px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            letter-spacing: 0.12em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .footer-line {
+            width: 60px;
+            height: 1px;
+            background: rgba(125, 211, 252, 0.2);
+            margin: 0 auto 20px;
+        }
+
+        .footer-text {
+            opacity: 0.7;
+            transition: opacity 0.5s ease;
+        }
+
+        .footer-text:hover {
+            opacity: 1;
+            color: var(--accent);
+        }
+
+        /* ── Error / Empty state ── */
+        .error-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* ── Reduced Motion ── */
+        @media (prefers-reduced-motion: reduce) {
+            .orbit-o {
+                animation: none;
+            }
+            .title {
+                animation: none;
+            }
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 640px) {
+            .hero {
+                padding-top: max(12vh, 80px);
+                padding-bottom: 50px;
+            }
+            .repo-card {
+                padding: 18px 20px;
+                gap: 14px;
+                border-radius: 12px;
+            }
+            .repo-icon {
+                width: 34px;
+                height: 34px;
+                border-radius: 10px;
+            }
+            .repo-icon svg {
+                width: 17px;
+                height: 17px;
+            }
+            .repo-desc {
+                font-size: 0.82rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Starfield Canvas -->
+    <canvas id="starfield"></canvas>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Hero -->
+        <section class="hero">
+            <h1 class="title">Geekology: Atelier Reborn</h1>
+            <div class="title-separator"></div>
+            <p class="subtitle" aria-label="We just define some COOOOOL things. The five O's rotate around a center.">
+                <span class="subtitle-prefix">We just define some C</span>
+                <span class="orbit-container" aria-hidden="true">
+                    <span class="orbit-o">O</span>
+                    <span class="orbit-o">O</span>
+                    <span class="orbit-o">O</span>
+                    <span class="orbit-o">O</span>
+                    <span class="orbit-o">O</span>
+                </span>
+                <span class="subtitle-suffix">L things.</span>
+                <span class="subtitle-by">——By KaedeCo.</span>
+            </p>
+        </section>
+
+        <!-- Repos Section -->
+        <section class="repos-section">
+            <p class="section-label">Projects</p>
+            <div id="repos-container">
+                <!-- Skeleton loading -->
+                <div class="repo-card loading-skeleton" style="pointer-events:none;">
+                    <div style="width:40px;height:40px;border-radius:12px;background:rgba(125,211,252,0.06);flex-shrink:0;"></div>
+                    <div style="flex:1;">
+                        <div class="skeleton-line" style="width:40%;"></div>
+                        <div class="skeleton-line"></div>
+                        <div class="skeleton-line"></div>
+                    </div>
+                </div>
+                <div class="repo-card loading-skeleton" style="pointer-events:none;">
+                    <div style="width:40px;height:40px;border-radius:12px;background:rgba(125,211,252,0.06);flex-shrink:0;"></div>
+                    <div style="flex:1;">
+                        <div class="skeleton-line" style="width:35%;"></div>
+                        <div class="skeleton-line"></div>
+                        <div class="skeleton-line"></div>
+                    </div>
+                </div>
+                <div class="repo-card loading-skeleton" style="pointer-events:none;">
+                    <div style="width:40px;height:40px;border-radius:12px;background:rgba(125,211,252,0.06);flex-shrink:0;"></div>
+                    <div style="flex:1;">
+                        <div class="skeleton-line" style="width:45%;"></div>
+                        <div class="skeleton-line"></div>
+                        <div class="skeleton-line"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-line"></div>
+        <p class="footer-text">Ad astra, Per aspera.</p>
+    </footer>
+
+    <script>
+        /* ═══════════════════════════════════════════
+           STARFIELD BACKGROUND
+           ═══════════════════════════════════════════ */
+        (function() {
+            const canvas = document.getElementById('starfield');
+            const ctx = canvas.getContext('2d');
+
+            let width, height;
+            const stars = [];
+            const STAR_COUNT = 220;
+            const SHOOTING_STAR_INTERVAL = 4000; // avg ms between shooting stars
+
+            function resize() {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+            }
+
+            function createStar() {
+                return {
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    r: Math.random() * 1.8 + 0.3,
+                    baseAlpha: Math.random() * 0.7 + 0.3,
+                    alpha: 0,
+                    twinkleSpeed: Math.random() * 0.015 + 0.005,
+                    twinkleOffset: Math.random() * Math.PI * 2,
+                    color: Math.random() < 0.12
+                        ? (Math.random() < 0.5 ? '173,216,252' : '192,132,252') // accent tint
+                        : '255,255,255'
+                };
+            }
+
+            function initStars() {
+                stars.length = 0;
+                for (let i = 0; i < STAR_COUNT; i++) {
+                    stars.push(createStar());
+                }
+            }
+
+            // Shooting star
+            let shootingStar = null;
+
+            function spawnShootingStar() {
+                const fromLeft = Math.random() < 0.5;
+                shootingStar = {
+                    x: fromLeft ? Math.random() * width * 0.3 : width * 0.5 + Math.random() * width * 0.5,
+                    y: Math.random() * height * 0.4,
+                    vx: fromLeft ? 3 + Math.random() * 4 : -(3 + Math.random() * 4),
+                    vy: 1.2 + Math.random() * 2,
+                    life: 1,
+                    decay: 0.008 + Math.random() * 0.02,
+                    length: 60 + Math.random() * 100
+                };
+            }
+
+            function drawStarfield(timestamp) {
+                ctx.clearRect(0, 0, width, height);
+
+                // Draw static stars with twinkle
+                for (const s of stars) {
+                    s.alpha = s.baseAlpha + Math.sin(timestamp * s.twinkleSpeed + s.twinkleOffset) * 0.25;
+                    s.alpha = Math.max(0.15, Math.min(1, s.alpha));
+
+                    ctx.beginPath();
+                    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(${s.color},${s.alpha})`;
+                    ctx.fill();
+
+                    // Glow for larger stars
+                    if (s.r > 1.2 && s.alpha > 0.7) {
+                        ctx.beginPath();
+                        ctx.arc(s.x, s.y, s.r * 2.5, 0, Math.PI * 2);
+                        ctx.fillStyle = `rgba(${s.color},${s.alpha * 0.1})`;
+                        ctx.fill();
+                    }
+                }
+
+                // Shooting star
+                if (shootingStar) {
+                    const ss = shootingStar;
+                    const tailX = ss.x - ss.vx * ss.length * 0.7;
+                    const tailY = ss.y - ss.vy * ss.length * 0.7;
+
+                    const gradient = ctx.createLinearGradient(ss.x, ss.y, tailX, tailY);
+                    gradient.addColorStop(0, `rgba(255,255,255,${ss.life})`);
+                    gradient.addColorStop(0.3, `rgba(173,216,252,${ss.life * 0.6})`);
+                    gradient.addColorStop(1, 'rgba(173,216,252,0)');
+
+                    ctx.beginPath();
+                    ctx.moveTo(ss.x, ss.y);
+                    ctx.lineTo(tailX, tailY);
+                    ctx.strokeStyle = gradient;
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+
+                    ss.x += ss.vx;
+                    ss.y += ss.vy;
+                    ss.life -= ss.decay;
+
+                    if (ss.life <= 0 || ss.x < -50 || ss.x > width + 50 || ss.y > height + 50) {
+                        shootingStar = null;
+                    }
+                }
+            }
+
+            let lastSpawn = 0;
+            function loop(timestamp) {
+                if (!shootingStar && timestamp - lastSpawn > SHOOTING_STAR_INTERVAL + Math.random() * 3000) {
+                    spawnShootingStar();
+                    lastSpawn = timestamp;
+                }
+                drawStarfield(timestamp);
+                requestAnimationFrame(loop);
+            }
+
+            // Handle resize
+            let resizeTimeout;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(() => {
+                    resize();
+                    initStars();
+                }, 200);
+            });
+
+            // Start
+            resize();
+            initStars();
+            requestAnimationFrame(loop);
+        })();
+
+        /* ═══════════════════════════════════════════
+           GITHUB REPOS FETCH
+           ═══════════════════════════════════════════ */
+        (function() {
+            const container = document.getElementById('repos-container');
+
+            // Target repos (in desired order)
+            const TARGET_REPOS = ['OpenWHU', 'miho-spot', 'advisor-review-platform'];
+            const FORK_REPOS = ['OpenWHU'];
+
+            // Fallback descriptions (used if API fetch fails)
+            const FALLBACK_DESCRIPTIONS = {
+                'OpenWHU': '武汉大学课程资料整理 — WHU课代表计划',
+                'miho-spot': '基于LLM情感分析与热搜平台调用的米哈游社区舆论监测系统',
+                'advisor-review-platform': '聚合国内导师评价平台的一站式导师评价统计系统'
+            };
+
+            function renderRepos(repos) {
+                const html = repos.map(repo => {
+                    const isFork = FORK_REPOS.includes(repo.name);
+                    const desc = repo.description || FALLBACK_DESCRIPTIONS[repo.name] || '';
+                    const repoUrl = `https://github.com/KaedeCo/${repo.name}`;
+
+                    return `
+                    <a href="${repoUrl}" class="repo-card" target="_blank" rel="noopener noreferrer" aria-label="Open ${repo.name} on GitHub">
+                        <div class="repo-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                ${isFork
+                                    ? '<circle cx="12" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><path d="M18 9v1a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V9"/><path d="M12 12v3"/>'
+                                    : '<path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/>'
+                                }
+                            </svg>
+                        </div>
+                        <div class="repo-info">
+                            <div class="repo-name">
+                                ${repo.name}
+                                ${isFork ? '<span class="fork-badge">Fork</span>' : ''}
+                            </div>
+                            <p class="repo-desc">${desc}</p>
+                        </div>
+                        <div class="repo-arrow">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M7 17L17 7"/><path d="M7 7h10v10"/>
+                            </svg>
+                        </div>
+                    </a>`;
+                }).join('');
+
+                container.innerHTML = html;
+            }
+
+            function renderFallback() {
+                const repos = TARGET_REPOS.map(name => ({
+                    name,
+                    description: FALLBACK_DESCRIPTIONS[name] || ''
+                }));
+                renderRepos(repos);
+            }
+
+            // Fetch from GitHub API
+            fetch('https://api.github.com/users/KaedeCo/repos?per_page=30&sort=updated')
+                .then(res => {
+                    if (!res.ok) throw new Error('API error');
+                    return res.json();
+                })
+                .then(allRepos => {
+                    // Filter and order target repos, exclude the pages repo itself
+                    const filtered = TARGET_REPOS
+                        .map(name => allRepos.find(r => r.name === name))
+                        .filter(Boolean);
+
+                    if (filtered.length === 0) {
+                        renderFallback();
+                    } else {
+                        renderRepos(filtered);
+                    }
+                })
+                .catch(() => {
+                    // API failed, use fallback
+                    renderFallback();
+                });
+        })();
+    </script>
+</body>
+</html>
