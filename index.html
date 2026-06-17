@@ -574,30 +574,23 @@
         })();
 
         /* ═══════════════════════════════════════════
-           GITHUB REPOS FETCH
+           GITHUB REPOS FETCH — auto-sync all public repos
            ═══════════════════════════════════════════ */
         (function() {
             const container = document.getElementById('repos-container');
-
-            // Target repos (in desired order)
-            const TARGET_REPOS = ['OpenWHU', 'miho-spot', 'advisor-review-platform'];
-            const FORK_REPOS = ['OpenWHU'];
-
-            // Fallback descriptions (used if API fetch fails)
-            const FALLBACK_DESCRIPTIONS = {
-                'OpenWHU': '武汉大学课程资料整理 — WHU课代表计划',
-                'miho-spot': '基于LLM情感分析与热搜平台调用的米哈游社区舆论监测系统',
-                'advisor-review-platform': '聚合国内导师评价平台的一站式导师评价统计系统'
-            };
+            const PAGES_REPO = 'KaedeCo.github.io';
 
             function renderRepos(repos) {
-                const html = repos.map(repo => {
-                    const isFork = FORK_REPOS.includes(repo.name);
-                    const desc = repo.description || FALLBACK_DESCRIPTIONS[repo.name] || '';
-                    const repoUrl = `https://github.com/KaedeCo/${repo.name}`;
+                if (repos.length === 0) {
+                    container.innerHTML = '<div class="error-state">No public projects yet.</div>';
+                    return;
+                }
 
+                const html = repos.map(repo => {
+                    const isFork = repo.fork;
+                    const desc = repo.description || '';
                     return `
-                    <a href="${repoUrl}" class="repo-card" target="_blank" rel="noopener noreferrer" aria-label="Open ${repo.name} on GitHub">
+                    <a href="${repo.html_url}" class="repo-card" target="_blank" rel="noopener noreferrer" aria-label="Open ${repo.name} on GitHub">
                         <div class="repo-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 ${isFork
@@ -624,35 +617,25 @@
                 container.innerHTML = html;
             }
 
-            function renderFallback() {
-                const repos = TARGET_REPOS.map(name => ({
-                    name,
-                    description: FALLBACK_DESCRIPTIONS[name] || ''
-                }));
-                renderRepos(repos);
-            }
-
-            // Fetch from GitHub API
+            // Fetch from GitHub API — auto-sync all public repos
             fetch('https://api.github.com/users/KaedeCo/repos?per_page=30&sort=updated')
                 .then(res => {
                     if (!res.ok) throw new Error('API error');
                     return res.json();
                 })
                 .then(allRepos => {
-                    // Filter and order target repos, exclude the pages repo itself
-                    const filtered = TARGET_REPOS
-                        .map(name => allRepos.find(r => r.name === name))
-                        .filter(Boolean);
+                    const filtered = allRepos
+                        .filter(r => r.name !== PAGES_REPO)
+                        .filter(r => !r.archived);
 
                     if (filtered.length === 0) {
-                        renderFallback();
+                        container.innerHTML = '<div class="error-state">No public projects yet.</div>';
                     } else {
                         renderRepos(filtered);
                     }
                 })
                 .catch(() => {
-                    // API failed, use fallback
-                    renderFallback();
+                    container.innerHTML = '<div class="error-state">Unable to load projects. Check back soon.</div>';
                 });
         })();
     </script>
