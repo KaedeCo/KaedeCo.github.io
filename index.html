@@ -44,6 +44,8 @@
             min-height: 100vh;
             overflow-x: hidden;
             cursor: default;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         /* ── Three.js Background Canvas ── */
@@ -621,6 +623,8 @@
         controls.minDistance = 8;
         controls.maxDistance = 65;
         controls.target.set(0, 1, 0);
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 0.25;
         controls.update();
 
         /* ── Background stars ── */
