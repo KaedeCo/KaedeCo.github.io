@@ -629,7 +629,7 @@
 
         /* ── Background stars (with twinkle via custom shader) ── */
         const starGeo = new THREE.BufferGeometry();
-        const starCount = 2000;
+        const starCount = 4000;
         const starVerts = new Float32Array(starCount * 3);
         const starColors = new Float32Array(starCount * 3);
         const starPhases = new Float32Array(starCount); // random phase offsets
@@ -662,7 +662,7 @@
                 out float vPhase;
                 void main() {
                     vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-                    gl_PointSize = (200.0 / -mvPosition.z);
+                    gl_PointSize = (280.0 / -mvPosition.z);
                     gl_Position = projectionMatrix * mvPosition;
                     vColor = color;
                     vPhase = phase;
@@ -675,9 +675,9 @@
                 void main() {
                     float d = length(gl_PointCoord - vec2(0.5));
                     if (d > 0.5) discard;
-                    float twinkle = 0.4 + 0.6 * (0.5 + 0.5 * sin(uTime * 2.0 + vPhase * 53.0));
-                    float glow = exp(-d * 10.0) * twinkle;
-                    float core = smoothstep(0.5, 0.0, d) * twinkle * 0.5;
+                    float twinkle = 0.12 + 0.88 * (0.5 + 0.5 * sin(uTime * 3.0 + vPhase * 61.0));
+                    float glow = exp(-d * 8.0) * twinkle;
+                    float core = smoothstep(0.5, 0.0, d) * twinkle * 0.55;
                     gl_FragColor = vec4(vColor, glow + core);
                 }
             `,
