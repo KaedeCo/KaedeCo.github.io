@@ -406,6 +406,67 @@
             opacity: 0;
         }
 
+        /* ── Focus-mode toggle ── */
+        .focus-toggle {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 10;
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            color: var(--text-muted);
+        }
+
+        .focus-toggle:hover {
+            border-color: rgba(125, 211, 252, 0.4);
+            color: var(--accent);
+            box-shadow: 0 0 20px rgba(125, 211, 252, 0.1);
+        }
+
+        .focus-toggle svg {
+            width: 20px;
+            height: 20px;
+            transition: opacity 0.2s ease;
+        }
+
+        .focus-toggle .eye-off { display: none; }
+        .focus-toggle .eye-on  { display: block; }
+
+        .focus-toggle.active {
+            border-color: rgba(192, 132, 252, 0.4);
+            color: var(--accent2);
+        }
+        .focus-toggle.active .eye-off { display: block; }
+        .focus-toggle.active .eye-on  { display: none; }
+
+        /* ── Hide repos in focus mode ── */
+        body.focus-mode .repos-section,
+        body.focus-mode .quotes-section,
+        body.focus-mode .footer {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        body.focus-mode .hero {
+            opacity: 0.25;
+            transition: opacity 0.5s ease;
+        }
+
+        .repos-section, .quotes-section, .footer, .hero {
+            transition: opacity 0.5s ease;
+        }
+
         /* ── Cosmic Quotes ── */
         .quotes-section {
             text-align: center;
@@ -438,6 +499,20 @@
     <!-- Three.js Background (stars + planets) -->
     <canvas id="bg-canvas"></canvas>
     <div class="drag-hint" id="drag-hint">Drag to explore the Solar System</div>
+
+    <!-- Focus toggle -->
+    <button class="focus-toggle" id="focus-toggle" aria-label="Toggle focus mode" title="Focus on Solar System">
+        <svg class="eye-on" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/>
+            <circle cx="12" cy="12" r="3"/>
+        </svg>
+        <svg class="eye-off" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/>
+            <path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/>
+            <path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/>
+            <path d="m2 2 20 20"/>
+        </svg>
+    </button>
 
     <!-- Main Content -->
     <div class="container">
@@ -816,6 +891,14 @@
                 showQuote(current);
             }, 10000);
         })();
+    </script>
+
+    <!-- Focus mode toggle -->
+    <script>
+        document.getElementById('focus-toggle').addEventListener('click', function() {
+            this.classList.toggle('active');
+            document.body.classList.toggle('focus-mode');
+        });
     </script>
 </body>
 </html>
