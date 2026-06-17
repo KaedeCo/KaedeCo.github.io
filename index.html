@@ -627,12 +627,14 @@
         controls.autoRotateSpeed = 0.25;
         controls.update();
 
-        /* ── Background stars ── */
+        /* ── Background stars (with twinkle via custom shader) ── */
         const starGeo = new THREE.BufferGeometry();
         const starCount = 2000;
         const starVerts = new Float32Array(starCount * 3);
         const starColors = new Float32Array(starCount * 3);
+        const starPhases = new Float32Array(starCount); // random phase offsets
         for (let i = 0; i < starCount * 3; i += 3) {
+            const idx = i / 3;
             const r = 40 + Math.random() * 90;
             const theta = Math.random() * Math.PI * 2;
             const phi = Math.acos(2 * Math.random() - 1);
@@ -643,11 +645,49 @@
             if (tint < 0.08) { starColors[i]=0.68; starColors[i+1]=0.83; starColors[i+2]=1.0; }
             else if (tint < 0.16) { starColors[i]=0.75; starColors[i+1]=0.52; starColors[i+2]=1.0; }
             else { const b = 0.7 + Math.random() * 0.3; starColors[i]=b; starColors[i+1]=b; starColors[i+2]=b; }
+            starPhases[idx] = Math.random() * Math.PI * 2;
         }
         starGeo.setAttribute('position', new THREE.BufferAttribute(starVerts, 3));
         starGeo.setAttribute('color', new THREE.BufferAttribute(starColors, 3));
-        const starMat = new THREE.PointsMaterial({ size:0.18, vertexColors:true, transparent:true, opacity:0.85, blending:THREE.AdditiveBlending, depthWrite:false });
-        scene.add(new THREE.Points(starGeo, starMat));
+        starGeo.setAttribute('phase', new THREE.BufferAttribute(starPhases, 1));
+
+        const starMat = new THREE.ShaderMaterial({
+            uniforms: {
+                uTime: { value: 0 }
+            },
+            vertexShader: /*glsl*/`
+                attribute float phase;
+                varying vec3 vColor;
+                varying float vPhase;
+                void main() {
+                    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+                    gl_PointSize = (180.0 / -mvPosition.z) * 0.5;
+                    gl_Position = projectionMatrix * mvPosition;
+                    vColor = color;
+                    vPhase = phase;
+                }
+            `,
+            fragmentShader: /*glsl*/`
+                varying vec3 vColor;
+                varying float vPhase;
+                uniform float uTime;
+                void main() {
+                    float d = length(gl_PointCoord - vec2(0.5));
+                    if (d > 0.5) discard;
+                    float twinkle = 0.45 + 0.55 * (0.5 + 0.5 * sin(uTime * 2.5 + vPhase * 47.0));
+                    float glow = exp(-d * 12.0) * twinkle;
+                    float core = smoothstep(0.5, 0.0, d) * twinkle * 0.6;
+                    float alpha = glow + core;
+                    gl_FragColor = vec4(vColor, alpha);
+                }
+            `,
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            vertexColors: true
+        });
+        const starsMesh = new THREE.Points(starGeo, starMat);
+        scene.add(starsMesh);
 
         /* ── Lighting ── */
         scene.add(new THREE.AmbientLight(0x14142e, 0.6));
@@ -720,6 +760,7 @@
             requestAnimationFrame(animate);
             const days = daysSinceJ2000();
             const time = performance.now() * 0.001;
+            starMat.uniforms.uTime.value = time;
             const pulse = 1 + Math.sin(time * 0.4) * 0.04;
             glow1.scale.setScalar(pulse);
             glow2.scale.setScalar(pulse * 0.95);
