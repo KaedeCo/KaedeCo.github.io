@@ -463,8 +463,46 @@
             transition: opacity 0.5s ease;
         }
 
+        body.focus-mode .music-player {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
         .repos-section, .quotes-section, .footer, .hero {
             transition: opacity 0.5s ease;
+        }
+
+        /* ── Music Player ── */
+        .music-player {
+            position: fixed;
+            bottom: 28px;
+            left: 24px;
+            z-index: 10;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid rgba(125, 211, 252, 0.12);
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: opacity 0.5s ease, border-color 0.3s ease;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .music-player:hover {
+            border-color: rgba(125, 211, 252, 0.3);
+        }
+
+        .music-player iframe {
+            display: block;
+        }
+
+        @media (max-width: 640px) {
+            .music-player {
+                bottom: 16px;
+                left: 50%;
+                transform: translateX(-50%);
+            }
         }
 
         /* ── Cosmic Quotes ── */
@@ -499,6 +537,11 @@
     <!-- Three.js Background (stars + planets) -->
     <canvas id="bg-canvas"></canvas>
     <div class="drag-hint" id="drag-hint">Drag to explore the Solar System</div>
+
+    <!-- Music Player -->
+    <div class="music-player">
+        <iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width="280" height="52" src="//music.163.com/outchain/player?type=2&id=716311&auto=0&height=32"></iframe>
+    </div>
 
     <!-- Focus toggle -->
     <button class="focus-toggle" id="focus-toggle" aria-label="Toggle focus mode" title="Focus on Solar System">
