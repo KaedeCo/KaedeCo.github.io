@@ -656,35 +656,34 @@
                 uTime: { value: 0 }
             },
             vertexShader: /*glsl*/`
-                attribute float phase;
-                varying vec3 vColor;
-                varying float vPhase;
+                in float phase;
+                in vec3 color;
+                out vec3 vColor;
+                out float vPhase;
                 void main() {
                     vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-                    gl_PointSize = (180.0 / -mvPosition.z) * 0.5;
+                    gl_PointSize = (200.0 / -mvPosition.z);
                     gl_Position = projectionMatrix * mvPosition;
                     vColor = color;
                     vPhase = phase;
                 }
             `,
             fragmentShader: /*glsl*/`
-                varying vec3 vColor;
-                varying float vPhase;
+                in vec3 vColor;
+                in float vPhase;
                 uniform float uTime;
                 void main() {
                     float d = length(gl_PointCoord - vec2(0.5));
                     if (d > 0.5) discard;
-                    float twinkle = 0.45 + 0.55 * (0.5 + 0.5 * sin(uTime * 2.5 + vPhase * 47.0));
-                    float glow = exp(-d * 12.0) * twinkle;
-                    float core = smoothstep(0.5, 0.0, d) * twinkle * 0.6;
-                    float alpha = glow + core;
-                    gl_FragColor = vec4(vColor, alpha);
+                    float twinkle = 0.4 + 0.6 * (0.5 + 0.5 * sin(uTime * 2.0 + vPhase * 53.0));
+                    float glow = exp(-d * 10.0) * twinkle;
+                    float core = smoothstep(0.5, 0.0, d) * twinkle * 0.5;
+                    gl_FragColor = vec4(vColor, glow + core);
                 }
             `,
             transparent: true,
             blending: THREE.AdditiveBlending,
-            depthWrite: false,
-            vertexColors: true
+            depthWrite: false
         });
         const starsMesh = new THREE.Points(starGeo, starMat);
         scene.add(starsMesh);
